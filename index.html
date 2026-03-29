@@ -187,13 +187,18 @@
     /* ── CANVAS AREA ── */
     .canvas-wrap {
       flex: 1;
-      overflow: auto;
+      overflow: hidden;
       position: relative;
       background: radial-gradient(ellipse at 50% 50%, #1a1f35 0%, #0f1117 70%);
+      min-width: 0;
     }
     #mindmap-svg {
       display: block;
       cursor: grab;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
     }
     #mindmap-svg:active { cursor: grabbing; }
 
@@ -698,8 +703,11 @@ function render() {
   const totalW = Math.max(...nodes.map(n => n.x + n.w)) + 80;
   const totalH = Math.max(...nodes.map(n => n.y + n.h)) + 80;
 
-  svg.setAttribute('width', Math.max(totalW, 800));
-  svg.setAttribute('height', Math.max(totalH, 600));
+  // SVG fills the canvas container; content is positioned via the inner <g> transform
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('height', '100%');
+  svg.setAttribute('viewBox', `0 0 ${Math.max(totalW, 800)} ${Math.max(totalH, 600)}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
   svg.innerHTML = '';
 
   // defs
@@ -869,14 +877,22 @@ document.addEventListener('mouseup', () => { isPanning = false; svg.style.cursor
 
 wrap.addEventListener('wheel', (e) => {
   e.preventDefault();
+  const rect = wrap.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
   const delta = e.deltaY > 0 ? 0.9 : 1.1;
-  transform.scale = Math.min(Math.max(transform.scale * delta, 0.3), 2.5);
+  // Zoom towards mouse pointer
+  transform.x = mouseX - (mouseX - transform.x) * delta;
+  transform.y = mouseY - (mouseY - transform.y) * delta;
+  transform.scale = Math.min(Math.max(transform.scale * delta, 0.2), 4);
   updateTransform();
 }, { passive: false });
 
 function updateTransform() {
   const g = svg.querySelector('g');
-  if (g) g.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.scale})`);
+  if (!g) return;
+  // Use a pixel-space transform on the inner group so zoom never clips at SVG boundary
+  g.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.scale})`);
 }
 
 // ═══════════════════════════════════════════════════════
