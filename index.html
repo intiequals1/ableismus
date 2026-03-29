@@ -299,11 +299,95 @@
 
     /* ── MOBILE ── */
     @media (max-width: 768px) {
-      .layout { flex-direction: column; height: auto; }
-      .sidebar { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+      header { padding: 0.8rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
       header h1 { font-size: 1rem; }
+      header p { font-size: 0.72rem; }
       .header-controls { display: none; }
+      .header-badge { font-size: 0.65rem; }
+
+      /* Canvas fills full screen below header */
+      .layout {
+        flex-direction: column;
+        height: calc(100dvh - 64px);
+        position: relative;
+      }
+
+      /* Sidebar becomes a slide-up bottom sheet */
+      .sidebar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-width: 0;
+        max-height: 55vh;
+        border-right: none;
+        border-top: 2px solid var(--accent-blue);
+        border-radius: 16px 16px 0 0;
+        z-index: 50;
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        overflow-y: auto;
+        padding: 1rem;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.5);
+      }
+      .sidebar.mobile-open {
+        transform: translateY(0);
+      }
+      .sidebar.collapsed {
+        width: 100%;
+        transform: translateY(100%);
+      }
+
+      /* Canvas fills the full layout area */
+      .canvas-wrap {
+        flex: 1;
+        height: 100%;
+        touch-action: none; /* allow JS touch handling */
+      }
+
+      /* Floating mobile toolbar */
+      .mobile-toolbar {
+        display: flex;
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 60;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .mobile-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: 1px solid var(--accent-blue);
+        color: var(--text);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        transition: background 0.2s;
+      }
+      .mobile-btn:active { background: var(--accent-blue); }
+
+      /* Drag handle for bottom sheet */
+      .sheet-handle {
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: var(--text-muted);
+        border-radius: 2px;
+        margin: 0 auto 0.8rem;
+        opacity: 0.5;
+      }
     }
+
+    /* Hide mobile toolbar on desktop */
+    .mobile-toolbar { display: none; }
+    .sheet-handle { display: none; }
   </style>
 </head>
 <body>
@@ -326,6 +410,7 @@
 <div class="layout">
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
+    <span class="sheet-handle"></span>
     <div class="panel-title">Knotendetails</div>
     <div class="info-panel" id="info-panel">
       <p class="placeholder">Klicke auf einen Knoten in der Mindmap, um hier Beschreibungen und Links zu sehen.</p>
@@ -350,6 +435,14 @@
   <!-- SVG CANVAS -->
   <div class="canvas-wrap" id="canvas-wrap">
     <svg id="mindmap-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- MOBILE FLOATING TOOLBAR -->
+  <div class="mobile-toolbar" id="mobile-toolbar">
+    <button class="mobile-btn" id="mob-info" title="Details">&#9432;</button>
+    <button class="mobile-btn" id="mob-fit" title="Ansicht anpassen">&#x26F6;</button>
+    <button class="mobile-btn" id="mob-expand" title="Alle aufklappen">&#xFF0B;</button>
+    <button class="mobile-btn" id="mob-collapse" title="Alle zuklappen">&#xFF0D;</button>
   </div>
 </div>
 
@@ -854,11 +947,12 @@ document.addEventListener('mousemove', (e) => {
 });
 
 // ═══════════════════════════════════════════════════════
-//  PAN & ZOOM
+//  PAN & ZOOM (mouse + touch)
 // ═══════════════════════════════════════════════════════
 let isPanning = false, startX, startY, startTx, startTy;
 const wrap = document.getElementById('canvas-wrap');
 
+// ── Mouse pan ──
 wrap.addEventListener('mousedown', (e) => {
   if (e.target.closest('.node')) return;
   isPanning = true;
@@ -874,24 +968,91 @@ document.addEventListener('mousemove', (e) => {
 });
 document.addEventListener('mouseup', () => { isPanning = false; svg.style.cursor = 'grab'; });
 
+// ── Mouse wheel zoom ──
 wrap.addEventListener('wheel', (e) => {
   e.preventDefault();
   const rect = wrap.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
   const delta = e.deltaY > 0 ? 0.9 : 1.1;
-  // Zoom towards mouse pointer
   transform.x = mouseX - (mouseX - transform.x) * delta;
   transform.y = mouseY - (mouseY - transform.y) * delta;
   transform.scale = Math.min(Math.max(transform.scale * delta, 0.2), 4);
   updateTransform();
 }, { passive: false });
 
+// ── Touch pan & pinch-zoom ──
+let lastTouches = null;
+let lastPinchDist = null;
+
+wrap.addEventListener('touchstart', (e) => {
+  lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+  if (e.touches.length === 2) {
+    lastPinchDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+  }
+}, { passive: true });
+
+wrap.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const touches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+
+  if (e.touches.length === 1 && lastTouches && lastTouches.length === 1) {
+    // Single finger pan
+    const dx = touches[0].x - lastTouches[0].x;
+    const dy = touches[0].y - lastTouches[0].y;
+    transform.x += dx;
+    transform.y += dy;
+    updateTransform();
+  } else if (e.touches.length === 2 && lastTouches && lastTouches.length >= 2) {
+    // Two-finger pinch zoom
+    const newDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    if (lastPinchDist) {
+      const delta = newDist / lastPinchDist;
+      const rect = wrap.getBoundingClientRect();
+      const cx = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+      const cy = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      transform.x = cx - (cx - transform.x) * delta;
+      transform.y = cy - (cy - transform.y) * delta;
+      transform.scale = Math.min(Math.max(transform.scale * delta, 0.15), 4);
+      updateTransform();
+    }
+    lastPinchDist = newDist;
+  }
+  lastTouches = touches;
+}, { passive: false });
+
+wrap.addEventListener('touchend', (e) => {
+  lastTouches = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+  if (e.touches.length < 2) lastPinchDist = null;
+}, { passive: true });
+
 function updateTransform() {
   const g = svg.querySelector('g');
   if (!g) return;
-  // Use a pixel-space transform on the inner group so zoom never clips at SVG boundary
   g.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.scale})`);
+}
+
+// ── Auto-fit: scale & center the full mindmap in the canvas on load ──
+function fitToCanvas() {
+  layoutTree(DATA);
+  assignPositions(DATA, 0, 0);
+  const nodes = collectNodes(DATA);
+  const totalW = Math.max(...nodes.map(n => n.x + n.w)) + 40;
+  const totalH = Math.max(...nodes.map(n => n.y + n.h)) + 40;
+  const rect = wrap.getBoundingClientRect();
+  const scaleX = rect.width  / (totalW + 80);
+  const scaleY = rect.height / (totalH + 80);
+  const s = Math.min(scaleX, scaleY, 1); // never scale up beyond 1
+  transform.scale = s;
+  transform.x = (rect.width  - totalW * s) / 2;
+  transform.y = (rect.height - totalH * s) / 2;
+  updateTransform();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -911,13 +1072,33 @@ document.getElementById('btn-collapse').addEventListener('click', () => {
   DATA.children.forEach(c => { c._collapsed = true; });
   render();
 });
-document.getElementById('btn-reset').addEventListener('click', () => {
-  transform = { x: 40, y: 40, scale: 1 };
-  updateTransform();
-});
+document.getElementById('btn-reset').addEventListener('click', fitToCanvas);
 document.getElementById('btn-sidebar').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('collapsed');
 });
+
+// ── Mobile toolbar buttons ──
+const isMobile = () => window.innerWidth <= 768;
+
+document.getElementById('mob-info').addEventListener('click', () => {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('mobile-open');
+});
+document.getElementById('mob-fit').addEventListener('click', fitToCanvas);
+document.getElementById('mob-expand').addEventListener('click', () => setAllCollapsed(false));
+document.getElementById('mob-collapse').addEventListener('click', () => {
+  DATA.children.forEach(c => { c._collapsed = true; });
+  render();
+});
+
+// Open sidebar automatically when a node is tapped on mobile
+const origShowInfo = showInfo;
+function showInfo(node) {
+  origShowInfo(node);
+  if (isMobile()) {
+    document.getElementById('sidebar').classList.add('mobile-open');
+  }
+}
 
 // Search
 function doSearch() {
@@ -951,7 +1132,13 @@ document.getElementById('search-input').addEventListener('keydown', (e) => { if 
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
+// Render first, then fit to canvas once layout dimensions are known
 render();
+requestAnimationFrame(() => {
+  fitToCanvas();
+  // Re-fit on orientation change / resize
+  window.addEventListener('resize', () => { fitToCanvas(); });
+});
 </script>
 </body>
 </html>
