@@ -924,6 +924,10 @@ function showInfo(node) {
     html += `<p style="margin-top:0.6rem;font-size:0.75rem;color:var(--text-muted)">Klicke erneut, um ${node._collapsed ? 'aufzuklappen' : 'zuzuklappen'} (${node.children.length} Unterknoten).</p>`;
   }
   panel.innerHTML = html;
+  // On mobile: open the bottom sheet automatically
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.add('mobile-open');
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1090,15 +1094,6 @@ document.getElementById('mob-collapse').addEventListener('click', () => {
   DATA.children.forEach(c => { c._collapsed = true; });
   render();
 });
-
-// Open sidebar automatically when a node is tapped on mobile
-const origShowInfo = showInfo;
-function showInfo(node) {
-  origShowInfo(node);
-  if (isMobile()) {
-    document.getElementById('sidebar').classList.add('mobile-open');
-  }
-}
 
 // Search
 function doSearch() {
