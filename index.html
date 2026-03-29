@@ -1127,6 +1127,14 @@ document.getElementById('search-input').addEventListener('keydown', (e) => { if 
 // ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
+// Collapse all nodes recursively on first load
+function collapseAll(node) {
+  if (node.children && node.children.length > 0) {
+    node._collapsed = true;
+    node.children.forEach(collapseAll);
+  }
+}
+collapseAll(DATA);
 // Render first, then fit to canvas once layout dimensions are known
 render();
 requestAnimationFrame(() => {
