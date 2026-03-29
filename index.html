@@ -195,10 +195,8 @@
     #mindmap-svg {
       display: block;
       cursor: grab;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0; left: 0;
+      /* SVG uses real pixel dimensions; overflow visible so pan/zoom never clips */
+      overflow: visible;
     }
     #mindmap-svg:active { cursor: grabbing; }
 
@@ -703,11 +701,12 @@ function render() {
   const totalW = Math.max(...nodes.map(n => n.x + n.w)) + 80;
   const totalH = Math.max(...nodes.map(n => n.y + n.h)) + 80;
 
-  // SVG fills the canvas container; content is positioned via the inner <g> transform
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '100%');
-  svg.setAttribute('viewBox', `0 0 ${Math.max(totalW, 800)} ${Math.max(totalH, 600)}`);
-  svg.setAttribute('preserveAspectRatio', 'none');
+  // Give the SVG real pixel dimensions so there is no scaling/distortion.
+  // overflow:visible on the SVG element means panned/zoomed content is never clipped.
+  svg.setAttribute('width', Math.max(totalW, 800));
+  svg.setAttribute('height', Math.max(totalH, 600));
+  svg.removeAttribute('viewBox');
+  svg.removeAttribute('preserveAspectRatio');
   svg.innerHTML = '';
 
   // defs
