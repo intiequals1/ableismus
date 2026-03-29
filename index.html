@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ableismus in Gesundheit und Suizidhilfe – Interaktive Mindmap</title>
+  <meta name="description" content="Interaktive Mindmap zu Ableismus in Gesundheit und Suizidhilfe: Konzepte, Barrieren, Ethik, Recht und Forschung." />
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --surface2: #242740;
+      --accent-blue: #6c8ebf;
+      --accent-green: #82b366;
+      --accent-purple: #9b59b6;
+      --accent-orange: #e67e22;
+      --text: #e8eaf0;
+      --text-muted: #8892a4;
+      --border: #2e3250;
+      --node-center: #3d4f7c;
+      --node-branch: #2a5a3a;
+      --node-leaf: #1e4a2e;
+      --line: #4a5568;
+      --highlight: #7c9fd4;
+      --panel-bg: #1e2235;
+      --panel-border: #3a4060;
+      --tag-bg: #2a3050;
+      --link-color: #7eb8f7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #1a1d2e 0%, #242740 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+    }
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+    header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .header-badge {
+      background: var(--accent-blue);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .header-controls {
+      margin-left: auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn-ctrl {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-ctrl:hover { background: var(--accent-blue); color: #fff; border-color: var(--accent-blue); }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 72px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 320px;
+      min-width: 280px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--panel-border);
+      overflow-y: auto;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      transition: width 0.3s;
+    }
+    .sidebar.collapsed { width: 0; min-width: 0; padding: 0; overflow: hidden; }
+
+    .panel-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .info-panel {
+      background: var(--surface2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 1rem;
+      min-height: 120px;
+    }
+    .info-panel h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--highlight);
+      margin-bottom: 0.5rem;
+    }
+    .info-panel p {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .info-panel .placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+      font-size: 0.82rem;
+    }
+
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+    .links-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--link-color);
+      font-size: 0.78rem;
+      text-decoration: none;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      background: var(--tag-bg);
+      transition: background 0.2s;
+      word-break: break-word;
+    }
+    .links-list a:hover { background: #2a3f6f; }
+    .links-list a::before { content: "↗"; font-size: 0.7rem; flex-shrink: 0; }
+
+    .legend {
+      background: var(--surface2);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 0.8rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── CANVAS AREA ── */
+    .canvas-wrap {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background: radial-gradient(ellipse at 50% 50%, #1a1f35 0%, #0f1117 70%);
+    }
+    #mindmap-svg {
+      display: block;
+      cursor: grab;
+    }
+    #mindmap-svg:active { cursor: grabbing; }
+
+    /* ── NODES ── */
+    .node-center rect { fill: #3d4f7c; stroke: #6c8ebf; stroke-width: 2; rx: 8; }
+    .node-center text { fill: #e8eaf0; font-weight: 700; font-size: 13px; }
+
+    .node-branch rect { fill: #2a4a5a; stroke: #5a9abf; stroke-width: 1.5; rx: 6; }
+    .node-branch text { fill: #c8e6f5; font-weight: 600; font-size: 11px; }
+
+    .node-leaf rect { fill: #1e3a2a; stroke: #5a9a6a; stroke-width: 1; rx: 5; }
+    .node-leaf text { fill: #b8e6c8; font-size: 10px; }
+
+    .node-research rect { fill: #3a2a4a; stroke: #9b59b6; stroke-width: 1.5; rx: 6; }
+    .node-research text { fill: #d4b8e6; font-weight: 600; font-size: 11px; }
+
+    .node-research-leaf rect { fill: #2a1e3a; stroke: #7d3c98; stroke-width: 1; rx: 5; }
+    .node-research-leaf text { fill: #c8a8e0; font-size: 10px; }
+
+    .node g { cursor: pointer; transition: opacity 0.2s; }
+    .node:hover rect { filter: brightness(1.3); }
+    .node.active rect { filter: brightness(1.5); stroke-width: 2.5 !important; }
+
+    .edge { fill: none; stroke: #3a4a6a; stroke-width: 1.5; opacity: 0.7; }
+
+    /* ── TOOLTIP ── */
+    .tooltip {
+      position: fixed;
+      background: #1e2235;
+      border: 1px solid #4a5a8a;
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.78rem;
+      color: var(--text);
+      pointer-events: none;
+      z-index: 200;
+      max-width: 220px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .tooltip.visible { opacity: 1; }
+
+    /* ── IMPRESSUM ── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    footer h4 {
+      color: var(--text);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    footer .impressum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    footer a { color: var(--link-color); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .disclaimer {
+      border-top: 1px solid var(--border);
+      padding-top: 0.8rem;
+      margin-top: 0.8rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* ── SEARCH ── */
+    .search-box {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .search-box input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .search-box input:focus { border-color: var(--accent-blue); }
+    .search-box button {
+      background: var(--accent-blue);
+      border: none;
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; height: auto; }
+      .sidebar { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+      header h1 { font-size: 1rem; }
+      .header-controls { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <h1>Ableismus in Gesundheit und Suizidhilfe</h1>
+    <p>Interaktive Mindmap · Klicke auf einen Knoten für Details und Quellen</p>
+  </div>
+  <span class="header-badge">Interaktiv</span>
+  <div class="header-controls">
+    <button class="btn-ctrl" id="btn-expand">Alle aufklappen</button>
+    <button class="btn-ctrl" id="btn-collapse">Alle zuklappen</button>
+    <button class="btn-ctrl" id="btn-reset">Ansicht zurücksetzen</button>
+    <button class="btn-ctrl" id="btn-sidebar">Seitenleiste</button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="panel-title">Knotendetails</div>
+    <div class="info-panel" id="info-panel">
+      <p class="placeholder">Klicke auf einen Knoten in der Mindmap, um hier Beschreibungen und Links zu sehen.</p>
+    </div>
+
+    <div class="panel-title" style="margin-top:0.4rem">Suche</div>
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Knoten suchen…" />
+      <button id="search-btn">↵</button>
+    </div>
+
+    <div class="panel-title" style="margin-top:0.4rem">Legende</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3d4f7c;border:2px solid #6c8ebf"></div> Zentralthema</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a4a5a;border:2px solid #5a9abf"></div> Hauptkategorie</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a5a3a;border:2px solid #5a9a6a"></div> Unterthema</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1e3a2a;border:2px solid #5a9a6a"></div> Detail / Blatt</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a2a4a;border:2px solid #9b59b6"></div> Forschungslücken</div>
+    </div>
+  </aside>
+
+  <!-- SVG CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap">
+    <svg id="mindmap-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- FOOTER / IMPRESSUM -->
+<footer>
+  <div class="impressum-grid">
+    <div>
+      <h4>Impressum (gem. § 5 ECG &amp; § 25 MedienG)</h4>
+      <strong>Medieninhaber &amp; Betreiber:</strong><br/>
+      Claudiu Dangulea<br/>
+      Karl-Popper-Straße 5<br/>
+      1100 Wien, Österreich<br/>
+      E-Mail: <a href="mailto:claudiu.dangulea@gmail.com">claudiu.dangulea@gmail.com</a><br/>
+      Tel.: <a href="tel:+436763013307">+43 676 30 133 07</a>
+    </div>
+    <div>
+      <h4>Offenlegung (§ 25 MedienG)</h4>
+      <strong>Verantwortlich für den Inhalt:</strong> Claudiu Dangulea (Anschrift wie oben)<br/>
+      <strong>Zweck des Mediums:</strong> Bildung und Information über Ableismus im Gesundheitswesen.<br/>
+      <strong>Grundlegende Richtung:</strong> Sachliche, wissenschaftsbasierte Aufklärung ohne politische Parteinahme.<br/>
+      <strong>EU-Streitschlichtung:</strong> <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">ec.europa.eu/consumers/odr</a>
+    </div>
+    <div>
+      <h4>Datenschutz &amp; Haftung</h4>
+      Hosting: Google Sites (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland). Beim Besuch werden Server-Logfiles erfasst (IP, Browser, OS, Uhrzeit).<br/>
+      Alle externen Links führen zu öffentlichen Ressourcen. Für deren Inhalte wird keine Haftung übernommen.<br/>
+      Datenschutzbehörde: <a href="https://www.dsb.gv.at" target="_blank" rel="noopener">dsb.gv.at</a> · <a href="https://www.dangulea.at/impressum" target="_blank" rel="noopener" style="margin-top:0.4rem;display:inline-block">Vollständige Datenschutzerklärung</a>
+    </div>
+  </div>
+    <div class="disclaimer">
+      <strong>Haftungsausschluss:</strong> Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität kann keine Gewähr übernommen werden. Die Inhalte dienen ausschließlich der allgemeinen Information und ersetzen keine medizinische, rechtliche oder therapeutische Beratung. Bei gesundheitlichen Fragen wenden Sie sich bitte an qualifizierte Fachkräfte. · <strong>Urheberrecht:</strong> Die erstellten Inhalte unterliegen dem österreichischen Urheberrecht. Vervielfältigung bedarf der schriftlichen Zustimmung. · Stand: Jänner 2025 · <a href="https://www.dangulea.at" target="_blank" rel="noopener">www.dangulea.at</a>
+    </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DATA MODEL
+// ═══════════════════════════════════════════════════════
+const DATA = {
+  id: "root",
+  label: "Ableismus in\nGesundheit &\nSuizidhilfe",
+  type: "center",
+  desc: "Ableismus bezeichnet ein Wertesystem, das körperliche und geistige Fähigkeiten privilegiert und alles davon Abweichende systematisch abwertet. Im Gesundheitswesen entscheidet dieses System wortwörtlich über Leben und Tod von Menschen mit Behinderungen.",
+  links: [
+    { label: "WHO: Disability & Health", url: "https://www.who.int/news-room/fact-sheets/detail/disability-and-health" },
+    { label: "UN CRPD (Volltext EN)", url: "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-crpd" },
+    { label: "Sozialministerium Österreich", url: "https://www.sozialministerium.gv.at/Themen/Soziales/Menschen-mit-Behinderungen.html" }
+  ],
+  children: [
+    {
+      id: "konzept",
+      label: "Konzeptionelle\nGrundlagen",
+      type: "branch",
+      desc: "Die konzeptionellen Grundlagen beschreiben, was Ableismus ist, auf welchen Ebenen er wirkt und wie er historisch entstanden ist.",
+      links: [
+        { label: "Disability Justice Primer", url: "https://www.disabilityjustice.org/" },
+        { label: "CRPD – Soziales Modell", url: "https://www.ohchr.org/en/treaty-bodies/crpd" }
+      ],
+      children: [
+        {
+          id: "definition",
+          label: "Definition",
+          type: "sub",
+          desc: "Ableismus ist ein mehrstufiges System, das bestimmte Vorstellungen von körperlicher und geistiger Fähigkeit privilegiert und Menschen mit Behinderungen systematisch abwertet. Es geht weit über individuelle Vorurteile hinaus.",
+          links: [
+            { label: "Ableism Definition – APA", url: "https://www.apa.org/topics/disability/ableism" },
+            { label: "Disability Studies Quarterly", url: "https://dsq-sds.org/" }
+          ],
+          children: [
+            { id: "wertesystem", label: "Wertesystem für\nNormalität", type: "leaf", desc: "Gesellschaftliche Normen definieren einen 'normalen' Körper und Geist als Standard. Alles, was davon abweicht, wird als defizitär oder minderwertig bewertet.", links: [] },
+            { id: "strukturell-ben", label: "Strukturelle\nBenachteiligung", type: "leaf", desc: "Benachteiligung entsteht nicht nur durch individuelle Einstellungen, sondern durch systemische Strukturen in Institutionen, Gesetzen und gesellschaftlichen Normen.", links: [{ label: "Struktureller Ableismus – PMC", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9534792/" }] },
+            { id: "abwertung", label: "Abwertung von\nBehinderung", type: "leaf", desc: "Behinderung wird im medizinischen Modell als persönliches Defizit betrachtet, das 'geheilt' werden muss – anstatt als Teil menschlicher Diversität.", links: [] }
+          ]
+        },
+        {
+          id: "ebenen",
+          label: "Ebenen des\nAbleismus",
+          type: "sub",
+          desc: "Ableismus existiert auf vier ineinandergreifenden Ebenen: intrapersonal, interpersonell, institutionell und strukturell. Jede Ebene verstärkt die anderen.",
+          links: [
+            { label: "Levels of Ableism – Disability Justice", url: "https://www.disabilityjustice.org/justice-primer/" }
+          ],
+          children: [
+            { id: "intrapersonal", label: "Intrapersonal\n(internalisiert)", type: "leaf", desc: "Menschen mit Behinderungen internalisieren gesellschaftliche Abwertung und glauben selbst, eine Last zu sein oder weniger wert zu sein.", links: [] },
+            { id: "interpersonell", label: "Interpersonell\n(Bias/Stigma)", type: "leaf", desc: "Direkte Interaktionen, z.B. ungefragt den Rollstuhl schieben, übertrieben laut mit blinden Personen sprechen oder Paternalismus im Arztgespräch.", links: [] },
+            { id: "institutionell", label: "Institutionell\n(Barrieren)", type: "leaf", desc: "Starre Regeln in Institutionen, z.B. 10-Minuten-Slots in Arztpraxen, die keine alternative Kommunikation ermöglichen.", links: [{ label: "Barriers in Healthcare – Health Affairs", url: "https://www.healthaffairs.org/doi/10.1377/hlthaff.2022.00475" }] },
+            { id: "strukturell-pol", label: "Strukturell\n(Politik/Normen)", type: "leaf", desc: "Gesetze, Stadtplanung und Ressourcenverteilung, die Menschen mit Behinderungen systematisch ausschließen.", links: [{ label: "BGStG Österreich", url: "https://www.ris.bka.gv.at/geltendeFassung.wxe?Abfrage=bundesnormen&gesetzesnummer=20004228" }] }
+          ]
+        },
+        {
+          id: "historie",
+          label: "Historie",
+          type: "sub",
+          desc: "Die Geschichte des Ableismus reicht von eugenischen Bewegungen bis zur nationalsozialistischen Vernichtungspolitik. Diese historischen Muster prägen bis heute medizinische Denkmuster.",
+          links: [
+            { label: "Disability History – Smithsonian", url: "https://americanhistory.si.edu/disabilityrights/welcome.html" },
+            { label: "UN-Sonderberichterstattung", url: "https://www.ohchr.org/en/special-procedures/sr-disability" }
+          ],
+          children: [
+            { id: "eugenik", label: "Eugenische\nLogiken", type: "leaf", desc: "Im 19. und frühen 20. Jahrhundert wurden eugenische Theorien entwickelt, die Menschen mit Behinderungen als 'unwertes Leben' klassifizierten.", links: [{ label: "Eugenics History – NHGRI", url: "https://www.genome.gov/about-genomics/fact-sheets/Eugenics-and-Scientific-Racism" }] },
+            { id: "vernichtung", label: "Vernichtung\nlebensunwerten Lebens", type: "leaf", desc: "Im Nationalsozialismus wurden über 200.000 Menschen mit Behinderungen im Rahmen der 'Aktion T4' systematisch ermordet.", links: [{ label: "Aktion T4 – Holocaust Museum", url: "https://encyclopedia.ushmm.org/content/en/article/euthanasia-program" }] },
+            { id: "defizitmodell", label: "Medizinisches\nDefizitmodell", type: "leaf", desc: "Das medizinische Modell betrachtet Behinderung als individuelles Defizit, das geheilt werden muss – im Gegensatz zum sozialen Modell der CRPD.", links: [{ label: "Medical vs. Social Model", url: "https://www.scope.org.uk/about-us/social-model-of-disability/" }] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "gesundheit",
+      label: "Gesundheits-\nversorgung",
+      type: "branch",
+      desc: "Im Gesundheitssystem manifestiert sich Ableismus durch strukturelle Barrieren, ärztliche Einstellungen und messbar schlechtere Versorgungsoutcomes für Menschen mit Behinderungen.",
+      links: [
+        { label: "WHO Health Equity Report 2023", url: "https://www.who.int/publications/i/item/9789240063600" },
+        { label: "Ableism in Healthcare – NIH Study", url: "https://rehab.washington.edu/news-and-events/ableism-in-healthcare-study-receives-32-million-from-nih" }
+      ],
+      children: [
+        {
+          id: "barrieren",
+          label: "Barrieren",
+          type: "sub",
+          desc: "Strukturelle Barrieren im Gesundheitssystem verhindern gleichwertige Versorgung: von physischen Zugangsproblemen bis zu Kommunikationsdefiziten.",
+          links: [
+            { label: "Barrierefreiheit – Sozialministerium AT", url: "https://www.sozialministerium.gv.at/Themen/Soziales/Menschen-mit-Behinderungen/Barrierefreiheit.html" }
+          ],
+          children: [
+            { id: "barrierefreiheit", label: "Fehlende\nBarrierefreiheit", type: "leaf", desc: "Nicht höhenverstellbare Untersuchungsliegen, fehlende Rampen, keine Gebärdensprachdolmetscher – physische Barrieren führen direkt zu schlechterer Versorgung.", links: [{ label: "Accessible Healthcare – WHO", url: "https://www.who.int/news-room/fact-sheets/detail/disability-and-health" }] },
+            { id: "kommunikation", label: "Kommunikations-\ndefizite", type: "leaf", desc: "Gehörlose Patienten berichten, dass Ärzte mit Dolmetschern statt mit ihnen sprechen. Bürokratische Hürden bei der Dolmetscherbuchung führen zu vermiedenen Arztbesuchen.", links: [] },
+            { id: "wissensluecken", label: "Wissenslücken\nbeim Personal", type: "leaf", desc: "Nur 40,7% der befragten US-Ärzte waren sich sicher, Menschen mit Behinderungen gleichwertig versorgen zu können (Studie Health Affairs 2022).", links: [{ label: "Physicians & Disability – Health Affairs", url: "https://www.healthaffairs.org/doi/10.1377/hlthaff.2022.00475" }] }
+          ]
+        },
+        {
+          id: "aerztlich",
+          label: "Ärztliche\nEinstellungen",
+          type: "sub",
+          desc: "Studien zeigen, dass über 82% der Ärzte die Lebensqualität von Menschen mit Behinderungen pauschal als schlechter einschätzen – eine Haltung mit direkten klinischen Konsequenzen.",
+          links: [
+            { label: "Implicit Disability Bias Study – PMC", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9534792/" },
+            { label: "IAT – Project Implicit", url: "https://implicit.harvard.edu/implicit/" }
+          ],
+          children: [
+            { id: "lebensqualitaet", label: "Negative\nLebensqualitätsurteile", type: "leaf", desc: "82,4% der Ärzte schätzen die Lebensqualität von Menschen mit signifikanter Behinderung als schlechter ein – eine systematische Verzerrung mit Auswirkungen auf Diagnose und Behandlung.", links: [{ label: "Studie: Lagu et al. 2022", url: "https://www.healthaffairs.org/doi/10.1377/hlthaff.2022.00475" }] },
+            { id: "implizit", label: "Implizite\nVorurteile", type: "leaf", desc: "Der Implizite Assoziationstest (IAT) zeigt unbewusste Abwehrhaltungen gegenüber Behinderung bei medizinischem Personal – besonders relevant in Stresssituationen.", links: [{ label: "IAT Test – Harvard", url: "https://implicit.harvard.edu/implicit/takeatest.html" }] },
+            { id: "vermeidung", label: "Vermeidung\nder Behandlung", type: "leaf", desc: "Ärzte vermeiden aktiv die Behandlung von Patienten mit Behinderungen, weil sie sich nicht kompetent fühlen oder das System keine Zeit dafür einräumt.", links: [] }
+          ]
+        },
+        {
+          id: "outcomes",
+          label: "Versorgungs-\noutcomes",
+          type: "sub",
+          desc: "Ableismus führt zu messbaren Verschlechterungen der Gesundheitsversorgung: verzögerte Behandlungen, ausgelassene Untersuchungen und geringere Patientenzufriedenheit.",
+          links: [
+            { label: "Health Disparities – CDC", url: "https://www.cdc.gov/ncbddd/disabilityandhealth/disability-health-disparities.html" }
+          ],
+          children: [
+            { id: "delayed", label: "Delayed/Forgone\nCare", type: "leaf", desc: "Patienten mit Behinderungen verzögern oder vermeiden Arztbesuche aufgrund schlechter Erfahrungen, bürokratischer Hürden und erwarteter Diskriminierung.", links: [] },
+            { id: "missed", label: "Missed Care\nin der Pflege", type: "leaf", desc: "Notwendige Untersuchungen werden übersprungen, weil Equipment fehlt (z.B. nicht höhenverstellbare Liegen) oder die Zeit nicht ausreicht.", links: [] },
+            { id: "zufriedenheit", label: "Geringere\nPatientenzufriedenheit", type: "leaf", desc: "Menschen mit Behinderungen berichten systematisch schlechtere Erfahrungen im Gesundheitssystem, was zu Vertrauensverlust und weiterer Vermeidung führt.", links: [{ label: "Patient Experience – WHO", url: "https://www.who.int/publications/i/item/9789240063600" }] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "suizid",
+      label: "Assistierter\nSuizid & Ethik",
+      type: "branch",
+      desc: "Die Debatte um medizinisch assistierten Suizid (MAID) ist eng mit Ableismus verknüpft: Strukturelle Ausweglosigkeit kann Sterbewünsche erzeugen, die bei besserer Unterstützung nicht entstehen würden.",
+      links: [
+        { label: "UN-Sonderberichterstatterin Behinderung", url: "https://www.ohchr.org/en/special-procedures/sr-disability" },
+        { label: "Disability & Assisted Dying – PMC", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9322678/" },
+        { label: "Bioethik-Kommission Österreich", url: "https://www.bundeskanzleramt.gv.at/agenda/verfassung/bioethikkommission.html" }
+      ],
+      children: [
+        {
+          id: "risiko",
+          label: "Risikofaktoren",
+          type: "sub",
+          desc: "Fehlende gesellschaftliche Unterstützung, Diskriminierung und strukturelle Ausweglosigkeit können Sterbewünsche bei Menschen mit Behinderungen erzeugen oder verstärken.",
+          links: [
+            { label: "UN-Warnung zu MAID & Disability", url: "https://www.ohchr.org/en/special-procedures/sr-disability" }
+          ],
+          children: [
+            { id: "ausweglosigkeit", label: "Strukturelle\nAusweglosigkeit", type: "leaf", desc: "Wenn Pflegeassistenz gestrichen, barrierefreier Wohnraum unerschwinglich und soziale Teilhabe unmöglich ist, entsteht eine strukturell erzwungene Perspektivlosigkeit.", links: [] },
+            { id: "unterstuetzung", label: "Fehlende\nUnterstützungslagen", type: "leaf", desc: "Die UN warnt: Fehlende persönliche Assistenz, Armut und soziale Isolation beeinflussen Sterbewünsche massiv – unabhängig von der physischen Erkrankung.", links: [{ label: "UN Special Rapporteur Report", url: "https://www.ohchr.org/en/documents/thematic-reports/a77174-report-special-rapporteur-rights-persons-disabilities" }] },
+            { id: "abwertungsdruck", label: "Druck durch\nAbwertung", type: "leaf", desc: "Internalisierter Ableismus und gesellschaftliche Botschaften, eine Last zu sein, können den Wunsch nach dem eigenen Tod verstärken.", links: [] }
+          ]
+        },
+        {
+          id: "autonomie",
+          label: "Autonomie-\nkonzepte",
+          type: "sub",
+          desc: "Das Konzept der relationalen Autonomie hinterfragt, ob eine Entscheidung wirklich 'frei' ist, wenn strukturelle Bedingungen die Optionen massiv einschränken.",
+          links: [
+            { label: "Relationale Autonomie – SEP", url: "https://plato.stanford.edu/entries/autonomy-moral/" },
+            { label: "Bioethik & Behinderung – Dt. Ethikrat", url: "https://www.ethikrat.org/themen/medizin-und-pflege/" }
+          ],
+          children: [
+            { id: "relational", label: "Relationale\nAutonomie", type: "leaf", desc: "Autonomie ist kein Vakuum-Konzept: Ob eine Person wirklich frei entscheiden kann, hängt von ihrem sozialen Umfeld, Unterstützungsnetzwerk und den verfügbaren Optionen ab.", links: [{ label: "Relational Autonomy – PhilPapers", url: "https://philpapers.org/browse/relational-autonomy" }] },
+            { id: "soziale-bed", label: "Soziale Bedingungen\nder Wahl", type: "leaf", desc: "Eine Wahl, die auf dem Papier frei erscheint, kann durch strukturelle Rahmenbedingungen (Armut, Isolation, fehlende Pflege) faktisch erzwungen sein.", links: [] },
+            { id: "schutz", label: "Schutz vor\nDiskriminierung", type: "leaf", desc: "Die CRPD verpflichtet Staaten, sicherzustellen, dass Entscheidungen am Lebensende nicht durch Diskriminierung oder fehlende Unterstützung beeinflusst werden.", links: [{ label: "CRPD Art. 10 – Recht auf Leben", url: "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-crpd" }] }
+          ]
+        },
+        {
+          id: "bioethik",
+          label: "Bioethische\nDebatten",
+          type: "sub",
+          desc: "Die bioethische Debatte um MAID und Behinderung dreht sich um Lebenswertigkeitsurteile, die 'Expressivist Objection' und die Gefahr der Normalisierung.",
+          links: [
+            { label: "MAID & Disability Ethics – PMC", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9322678/" },
+            { label: "Disability Visibility Project", url: "https://disabilityvisibilityproject.com/2025/01/01/dying-a-good-death-disability-and-the-assisted-suicide-debate/" }
+          ],
+          children: [
+            { id: "lebenswert", label: "Lebenswertigkeits-\nurteile", type: "leaf", desc: "Die Annahme, ein Leben mit Behinderung sei per se weniger lebenswert, ist eine zentrale ableistische Vorannahme in bioethischen Debatten.", links: [] },
+            { id: "expressivist", label: "Expressivist\nObjection", type: "leaf", desc: "Die 'Expressivist Objection' argumentiert, dass die Legalisierung von MAID für Menschen mit Behinderungen implizit die Botschaft sendet, ihr Leben sei weniger wert.", links: [{ label: "Expressivist Objection – SEP", url: "https://plato.stanford.edu/entries/disability/" }] },
+            { id: "normalisierung", label: "Gefahr der\nNormalisierung", type: "leaf", desc: "Die UN warnt vor einer schleichenden Normalisierung von MAID für Menschen mit Behinderungen, wenn gesellschaftliche Unterstützungsstrukturen fehlen.", links: [{ label: "UN Warning on MAID", url: "https://www.ohchr.org/en/special-procedures/sr-disability" }] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "politik",
+      label: "Politik\nund Recht",
+      type: "branch",
+      desc: "Rechtliche Rahmenbedingungen auf internationaler, europäischer und nationaler Ebene bilden die Grundlage für den Schutz von Menschen mit Behinderungen im Gesundheitssystem.",
+      links: [
+        { label: "Monitoringausschuss Österreich", url: "https://www.monitoringausschuss.at/" },
+        { label: "Sozialministerium AT – Behindertenpolitik", url: "https://www.sozialministerium.gv.at/Themen/Soziales/Menschen-mit-Behinderungen/Behindertenpolitik-und-Behindertenrecht.html" }
+      ],
+      children: [
+        {
+          id: "crpd",
+          label: "UN-BRK\n(CRPD)",
+          type: "sub",
+          desc: "Die UN-Behindertenrechtskonvention (CRPD) ist das zentrale internationale Menschenrechtsinstrument für Menschen mit Behinderungen. Österreich hat sie 2008 ratifiziert.",
+          links: [
+            { label: "CRPD – UN Official", url: "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-crpd" },
+            { label: "CRPD Österreich – Bundeskanzleramt", url: "https://www.bundeskanzleramt.gv.at/agenda/verfassung/grund-und-menschenrechte/un-menschenrechtsschutz/crpd.html" },
+            { label: "Monitoringausschuss AT", url: "https://www.monitoringausschuss.at/" }
+          ],
+          children: [
+            { id: "recht-leben", label: "Recht auf\nLeben", type: "leaf", desc: "Art. 10 CRPD: Staaten müssen sicherstellen, dass Menschen mit Behinderungen das gleiche Recht auf Leben genießen wie alle anderen.", links: [{ label: "CRPD Art. 10", url: "https://social.desa.un.org/issues/disability/crpd/convention-on-the-rights-of-persons-with-disabilities-crpd" }] },
+            { id: "vorkehrungen", label: "Angemessene\nVorkehrungen", type: "leaf", desc: "Art. 2 CRPD: Die Verweigerung angemessener Vorkehrungen gilt als Diskriminierung. Im Gesundheitssystem bedeutet das z.B. Dolmetscher, barrierefreie Geräte.", links: [{ label: "BGStG Österreich", url: "https://www.ris.bka.gv.at/geltendeFassung.wxe?Abfrage=bundesnormen&gesetzesnummer=20004228" }] },
+            { id: "partizipation", label: "Partizipation", type: "leaf", desc: "Art. 4(3) CRPD: Staaten müssen Menschen mit Behinderungen in alle Entscheidungsprozesse einbeziehen, die sie betreffen.", links: [] }
+          ]
+        },
+        {
+          id: "strategien",
+          label: "Internationale\nStrategien",
+          type: "sub",
+          desc: "Internationale Strategien von WHO und EU setzen konkrete Maßnahmen zur Verbesserung der Gesundheitsversorgung für Menschen mit Behinderungen.",
+          links: [
+            { label: "EU Disability Strategy 2021–2030", url: "https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/union-equality-strategy-rights-persons-disabilities-2021-2030_en" },
+            { label: "WHO Global Report 2023", url: "https://www.who.int/publications/i/item/9789240063600" }
+          ],
+          children: [
+            { id: "who-report", label: "WHO Health\nEquity Report", type: "leaf", desc: "Der WHO-Bericht 2023 formuliert 40 konkrete Handlungsfelder: Barrierefreiheit, Kassensystemreform, Ausbildungsrevolution und Datenerhebung.", links: [{ label: "WHO Report 2023", url: "https://www.who.int/publications/i/item/9789240063600" }] },
+            { id: "eu-strategie", label: "EU-Strategie\n2021–2030", type: "leaf", desc: "Die EU-Behindertenrechtsstrategie 2021–2030 zielt auf volle Inklusion in allen Lebensbereichen, einschließlich Gesundheit, Bildung und Arbeit.", links: [{ label: "EU Strategy 2021–2030", url: "https://commission.europa.eu/strategy-and-policy/policies/justice-and-fundamental-rights/disability/union-equality-strategy-rights-persons-disabilities-2021-2030_en" }] },
+            { id: "deinstitut", label: "Deinstitution-\nalisierung", type: "leaf", desc: "Die EU fördert den Übergang von großen Heimen zu ambulanter, gemeindenaher Unterstützung – ein zentrales Ziel für Selbstbestimmung und Inklusion.", links: [{ label: "Deinstitutionalisation – ECCL", url: "https://www.deinstitutionalisation.com/" }] }
+          ]
+        }
+      ]
+    },
+    {
+      id: "forschung",
+      label: "Forschungs-\nlücken",
+      type: "research",
+      desc: "Trotz wachsender Evidenz bestehen erhebliche Forschungslücken: Wie misst man strukturellen Ableismus? Wie verhindert man, dass KI ableistische Muster skaliert?",
+      links: [
+        { label: "Disability Research – NIDRR", url: "https://www.acl.gov/programs/research-and-development" },
+        { label: "AI & Disability Bias – MIT", url: "https://www.media.mit.edu/projects/disability-bias-ai/overview/" }
+      ],
+      children: [
+        { id: "messung", label: "Messung strukturellen\nAbleismus", type: "research-leaf", desc: "Es fehlen validierte Instrumente zur systematischen Messung von strukturellem Ableismus im Gesundheitssystem auf institutioneller Ebene.", links: [] },
+        { id: "kausalitaet", label: "Kausalität\nAbleismus–Suizidwunsch", type: "research-leaf", desc: "Der kausale Zusammenhang zwischen strukturellem Ableismus und Sterbewünschen bei Menschen mit Behinderungen ist empirisch noch unzureichend belegt.", links: [{ label: "Disability & Suicide Research", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9322678/" }] },
+        { id: "intervention", label: "Interventions-\nevaluation", type: "research-leaf", desc: "Welche Interventionen in der medizinischen Ausbildung sind am wirksamsten, um implizite Vorurteile gegenüber Menschen mit Behinderungen zu reduzieren?", links: [{ label: "Medical Education & Disability", url: "https://www.mededportal.org/doi/10.15766/mep_2374-8265.11253" }] },
+        { id: "epistemisch", label: "Epistemische\nUngleichheit", type: "research-leaf", desc: "Wie kann das Wissen von Menschen mit Behinderungen über ihren eigenen Körper im klinischen Kontext systematisch anerkannt und einbezogen werden?", links: [] }
+      ]
+    }
+  ]
+};
+
+// ═══════════════════════════════════════════════════════
+//  LAYOUT ENGINE
+// ═══════════════════════════════════════════════════════
+const NODE_W = 130, NODE_H = 38;
+const H_GAP = 60, V_GAP = 14;
+
+function measureLabel(label) {
+  const lines = label.split('\n');
+  return { w: Math.max(...lines.map(l => l.length)) * 6.5 + 20, h: lines.length * 16 + 14 };
+}
+
+function layoutTree(node, depth = 0) {
+  const sz = measureLabel(node.label);
+  node.w = Math.max(sz.w, 80);
+  node.h = Math.max(sz.h, 32);
+  if (!node.children || node.children.length === 0 || node._collapsed) {
+    node.subtreeH = node.h;
+    return;
+  }
+  node.children.forEach(c => layoutTree(c, depth + 1));
+  const totalChildH = node.children.reduce((s, c) => s + c.subtreeH, 0) + V_GAP * (node.children.length - 1);
+  node.subtreeH = Math.max(node.h, totalChildH);
+}
+
+function assignPositions(node, x, y) {
+  node.x = x;
+  node.y = y + (node.subtreeH - node.h) / 2;
+  if (!node.children || node.children.length === 0 || node._collapsed) return;
+  let cy = y;
+  node.children.forEach(child => {
+    assignPositions(child, x + node.w + H_GAP, cy);
+    cy += child.subtreeH + V_GAP;
+  });
+}
+
+function collectNodes(node, arr = []) {
+  arr.push(node);
+  if (node.children && !node._collapsed) node.children.forEach(c => collectNodes(c, arr));
+  return arr;
+}
+
+function collectEdges(node, arr = []) {
+  if (node.children && !node._collapsed) {
+    node.children.forEach(c => {
+      arr.push({ from: node, to: c });
+      collectEdges(c, arr);
+    });
+  }
+  return arr;
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+const svg = document.getElementById('mindmap-svg');
+let activeNode = null;
+let transform = { x: 40, y: 40, scale: 1 };
+
+function render() {
+  layoutTree(DATA);
+  assignPositions(DATA, 0, 0);
+
+  const nodes = collectNodes(DATA);
+  const edges = collectEdges(DATA);
+
+  const totalW = Math.max(...nodes.map(n => n.x + n.w)) + 80;
+  const totalH = Math.max(...nodes.map(n => n.y + n.h)) + 80;
+
+  svg.setAttribute('width', Math.max(totalW, 800));
+  svg.setAttribute('height', Math.max(totalH, 600));
+  svg.innerHTML = '';
+
+  // defs
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.innerHTML = `
+    <filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="shadow"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/></filter>
+  `;
+  svg.appendChild(defs);
+
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.scale})`);
+  svg.appendChild(g);
+
+  // edges
+  edges.forEach(({ from, to }) => {
+    const x1 = from.x + from.w;
+    const y1 = from.y + from.h / 2;
+    const x2 = to.x;
+    const y2 = to.y + to.h / 2;
+    const mx = (x1 + x2) / 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`);
+    path.setAttribute('class', 'edge');
+    g.appendChild(path);
+  });
+
+  // nodes
+  nodes.forEach(node => {
+    const grp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    grp.setAttribute('class', `node${activeNode === node ? ' active' : ''}`);
+    grp.setAttribute('transform', `translate(${node.x},${node.y})`);
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('width', node.w);
+    rect.setAttribute('height', node.h);
+    rect.setAttribute('rx', node.type === 'center' ? 10 : node.type.includes('leaf') ? 5 : 7);
+    rect.setAttribute('filter', 'url(#shadow)');
+
+    // colors by type
+    const colors = {
+      center:         { fill: '#3d4f7c', stroke: '#6c8ebf', sw: 2 },
+      branch:         { fill: '#2a4a5a', stroke: '#5a9abf', sw: 1.5 },
+      sub:            { fill: '#2a5a3a', stroke: '#5a9a6a', sw: 1.5 },
+      leaf:           { fill: '#1e3a2a', stroke: '#4a8a5a', sw: 1 },
+      research:       { fill: '#3a2a4a', stroke: '#9b59b6', sw: 1.5 },
+      'research-leaf':{ fill: '#2a1e3a', stroke: '#7d3c98', sw: 1 }
+    };
+    const c = colors[node.type] || colors.leaf;
+    rect.setAttribute('fill', activeNode === node ? lighten(c.fill) : c.fill);
+    rect.setAttribute('stroke', c.stroke);
+    rect.setAttribute('stroke-width', c.sw);
+    grp.appendChild(rect);
+
+    // expand/collapse indicator
+    if (node.children && node.children.length > 0) {
+      const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      indicator.setAttribute('cx', node.w - 8);
+      indicator.setAttribute('cy', node.h / 2);
+      indicator.setAttribute('r', 5);
+      indicator.setAttribute('fill', node._collapsed ? '#e67e22' : '#27ae60');
+      indicator.setAttribute('stroke', '#fff');
+      indicator.setAttribute('stroke-width', 0.8);
+      grp.appendChild(indicator);
+    }
+
+    // text
+    const lines = node.label.split('\n');
+    const lineH = 14;
+    const totalTextH = lines.length * lineH;
+    const startY = (node.h - totalTextH) / 2 + lineH * 0.8;
+    lines.forEach((line, i) => {
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', (node.w - (node.children ? 10 : 0)) / 2);
+      txt.setAttribute('y', startY + i * lineH);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('dominant-baseline', 'auto');
+      txt.setAttribute('fill', node.type === 'center' ? '#e8eaf0' : node.type.includes('research') ? '#d4b8e6' : node.type === 'branch' ? '#c8e6f5' : '#b8e6c8');
+      txt.setAttribute('font-size', node.type === 'center' ? '12' : node.type.includes('leaf') ? '9.5' : '10.5');
+      txt.setAttribute('font-weight', ['center','branch','sub','research'].includes(node.type) ? '600' : '400');
+      txt.setAttribute('font-family', 'Segoe UI, system-ui, sans-serif');
+      txt.textContent = line;
+      grp.appendChild(txt);
+    });
+
+    // events
+    grp.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (node.children && node.children.length > 0) {
+        node._collapsed = !node._collapsed;
+      }
+      activeNode = node;
+      showInfo(node);
+      render();
+    });
+    grp.addEventListener('mouseenter', (e) => showTooltip(e, node));
+    grp.addEventListener('mouseleave', hideTooltip);
+
+    g.appendChild(grp);
+  });
+}
+
+function lighten(hex) {
+  const r = parseInt(hex.slice(1,3),16), g2 = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.min(r+40,255)},${Math.min(g2+40,255)},${Math.min(b+40,255)})`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  INFO PANEL
+// ═══════════════════════════════════════════════════════
+function showInfo(node) {
+  const panel = document.getElementById('info-panel');
+  let html = `<h3>${node.label.replace(/\n/g,' ')}</h3><p>${node.desc || 'Keine Beschreibung verfügbar.'}</p>`;
+  if (node.links && node.links.length > 0) {
+    html += `<div class="links-list">`;
+    node.links.forEach(l => {
+      html += `<a href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label}</a>`;
+    });
+    html += `</div>`;
+  }
+  if (node.children && node.children.length > 0) {
+    html += `<p style="margin-top:0.6rem;font-size:0.75rem;color:var(--text-muted)">Klicke erneut, um ${node._collapsed ? 'aufzuklappen' : 'zuzuklappen'} (${node.children.length} Unterknoten).</p>`;
+  }
+  panel.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOOLTIP
+// ═══════════════════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+function showTooltip(e, node) {
+  if (!node.desc) return;
+  const short = node.desc.length > 100 ? node.desc.slice(0,100) + '…' : node.desc;
+  tooltip.textContent = short;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+function moveTooltip(e) {
+  tooltip.style.left = (e.clientX + 14) + 'px';
+  tooltip.style.top = (e.clientY - 10) + 'px';
+}
+document.addEventListener('mousemove', (e) => {
+  if (tooltip.classList.contains('visible')) moveTooltip(e);
+});
+
+// ═══════════════════════════════════════════════════════
+//  PAN & ZOOM
+// ═══════════════════════════════════════════════════════
+let isPanning = false, startX, startY, startTx, startTy;
+const wrap = document.getElementById('canvas-wrap');
+
+wrap.addEventListener('mousedown', (e) => {
+  if (e.target.closest('.node')) return;
+  isPanning = true;
+  startX = e.clientX; startY = e.clientY;
+  startTx = transform.x; startTy = transform.y;
+  svg.style.cursor = 'grabbing';
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  transform.x = startTx + (e.clientX - startX);
+  transform.y = startTy + (e.clientY - startY);
+  updateTransform();
+});
+document.addEventListener('mouseup', () => { isPanning = false; svg.style.cursor = 'grab'; });
+
+wrap.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  transform.scale = Math.min(Math.max(transform.scale * delta, 0.3), 2.5);
+  updateTransform();
+}, { passive: false });
+
+function updateTransform() {
+  const g = svg.querySelector('g');
+  if (g) g.setAttribute('transform', `translate(${transform.x},${transform.y}) scale(${transform.scale})`);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════════════
+function setAllCollapsed(val) {
+  function walk(n) {
+    if (n.children) { n._collapsed = val; n.children.forEach(walk); }
+  }
+  walk(DATA);
+  DATA._collapsed = false;
+  render();
+}
+
+document.getElementById('btn-expand').addEventListener('click', () => setAllCollapsed(false));
+document.getElementById('btn-collapse').addEventListener('click', () => {
+  DATA.children.forEach(c => { c._collapsed = true; });
+  render();
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  transform = { x: 40, y: 40, scale: 1 };
+  updateTransform();
+});
+document.getElementById('btn-sidebar').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
+// Search
+function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  if (!q) return;
+  const nodes = collectNodes(DATA);
+  const found = nodes.find(n => n.label.toLowerCase().includes(q) || (n.desc && n.desc.toLowerCase().includes(q)));
+  if (found) {
+    activeNode = found;
+    showInfo(found);
+    // expand path
+    function expandPath(node, target) {
+      if (node === target) return true;
+      if (node.children) {
+        for (const c of node.children) {
+          if (expandPath(c, target)) { node._collapsed = false; return true; }
+        }
+      }
+      return false;
+    }
+    expandPath(DATA, found);
+    render();
+    // scroll to node
+    const scaleF = transform.scale;
+    wrap.scrollTo({ left: found.x * scaleF + transform.x - 200, top: found.y * scaleF + transform.y - 200, behavior: 'smooth' });
+  }
+}
+document.getElementById('search-btn').addEventListener('click', doSearch);
+document.getElementById('search-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
